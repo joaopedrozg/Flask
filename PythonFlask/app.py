@@ -1,7 +1,10 @@
-from flask import Flask, render_template, request
+from curses import flash
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+import os
 
 app = Flask(__name__)
+app.secret_key = os.urandom(16)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cursos.sqlite3'
 
@@ -52,9 +55,46 @@ def lista_cursos():
     return render_template('cursos.html', cursos = cursos.query.all())
 	
     
-@app.route('/cria_cursos') 
+@app.route('/cria_cursos', methods=['POST', 'GET']) 
 def cria_curso():
-    return render_template('novo_curso.html')   
+    nome = request.form.get('nome')
+    descricao = request.form.get('descricao')
+    ch = request.form.get('ch')
+    if request.method == 'POST':
+        if not nome or not descricao or not ch:
+            flash('Preencha todos os campos do formulário', 'error')
+        else:
+            curso = cursos(nome, descricao, ch)
+            db.session.add(curso)
+            db.session.commit()
+            return redirect(url_for('lista_cursos'))
+    
+    return render_template('novo_curso.html')  
+
+
+@app.route('/<int:id>/atualiza_curso', methods=['GET','POST']) 
+def atualiza_curso(id):
+    curso = cursos.query.filter_by(id=id).first()
+    
+    if request.method == 'POST':
+        nome = request.form['nome']
+        descricao = request.form['descricao']
+        ch = request.form['ch']
+        
+        cursos.query.filter_by(id=id).update({'nome':nome, 'descricao':descricao, 'ch':ch})
+        db.session.commit()
+        return redirect(url_for('lista_cursos'))
+    
+    return render_template('atualiza_curso.html', curso=curso)
+    
+    
+@app.route('/<int:id>/remove_curso')    
+def remove_curso(id):
+    curso = cursos.query.filter_by(id=id).first()
+    db.session.delete(curso)
+    db.session.commit()
+    return redirect(url_for('lista_cursos'))
+    
     
 if __name__ == '__main__':
 	db.create_all()
