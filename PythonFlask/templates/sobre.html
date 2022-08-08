@@ -4,10 +4,31 @@
 	<hr>
 	
 			{%for registro in registros %}
+			<!--
 				<details>
 					<summary>{{registro.aluno}}</summary>
 					<p>{{registro.nota}}</p>
-				</details>
+				</details> -->
+
+				<p>
+					<a class="btn btn-secondary" data-bs-toggle="collapse" href="#collapseExample_{{registro.aluno}}" role="button" aria-expanded="false" aria-controls="collapseExample_{{registro.aluno}}">
+					 {{registro.aluno}}
+					</a>
+					
+				  </p>
+				  <div class="collapse" id="collapseExample_{{registro.aluno}}">
+					<div class="card card-body">
+					  {{registro.nota}}
+					</div>
+				  </div>
+
+
+
+
+
+
+
+
 			
 			{% endfor %}
 			<form action="{{url_for('sobre')}}" method="POST">
@@ -21,7 +42,7 @@
 					<input type="text" class="form-control" name="nota" placeholder="Digite uma nota para o aluno" required>
 				
 				</div>	
-				<button class="btn btn-primary">Adicionar</button>
+				<button class="btn btn-success">Adicionar</button>
 			</form>
 
 {% endblock conteudo %}
